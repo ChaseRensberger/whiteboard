@@ -6,8 +6,8 @@ description:
 ---
 
 Cursor can create reviews through MCP. Before setup, install the
-[Whiteboard command](/start/installation/#enable-the-command). Keep Whiteboard
-open during setup. Ask Agent requires the separate `cursor-agent` command.
+[Whiteboard command](/agents/#enable-the-command). Keep Whiteboard open during
+setup. Ask Agent requires the separate `cursor-agent` command.
 
 ## Use the connection prompt
 
@@ -58,7 +58,8 @@ For Windows:
 
 Reload Cursor's MCP tools or restart Cursor. Ask its agent to call
 `session_get_instructions` on the Whiteboard server. If the call succeeds,
-continue with [Your first review](/start/first-review/).
+continue with [Create a review](/guides/create-a-review/).
 
-To use [Ask Agent](/guides/ask-agent/), install Cursor CLI separately. Complete
-its sign-in process. Whiteboard launches `cursor-agent` with `acp`.
+To use [Ask Agent](/guides/give-feedback/#ask-inside-whiteboard), install Cursor
+CLI separately. Complete its sign-in process. Whiteboard launches `cursor-agent`
+with `acp`.

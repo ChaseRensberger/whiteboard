@@ -5,8 +5,8 @@ description: Connect oh-my-pi to Whiteboard through MCP to create reviews.
 
 oh-my-pi uses the `omp` command and can create reviews through MCP. Ask Agent
 does not support oh-my-pi in Whiteboard v0.2.0. Before setup, install the
-[Whiteboard command](/start/installation/#enable-the-command). Keep Whiteboard
-open during setup.
+[Whiteboard command](/agents/#enable-the-command). Keep Whiteboard open during
+setup.
 
 ## Get the setup instructions
 
@@ -61,4 +61,4 @@ omp plugin uninstall @dev.fast/pi-whiteboard
 
 Run `/mcp reload` inside oh-my-pi. Ask the agent to call
 `session_get_instructions` on the Whiteboard server. When that succeeds, follow
-[Your first review](/start/first-review/).
+[Create a review](/guides/create-a-review/).

@@ -4,8 +4,8 @@ description: Install the Whiteboard plugin in Codex and test the connection.
 ---
 
 Codex can create reviews and answer questions through Ask Agent. Before setup,
-install the [Whiteboard command](/start/installation/#enable-the-command) and
-sign in to Codex. Keep Whiteboard open during setup.
+install the [Whiteboard command](/agents/#enable-the-command) and sign in to
+Codex. Keep Whiteboard open during setup.
 
 ## Install the plugin
 
@@ -44,6 +44,7 @@ Reload Codex's MCP tools or restart Codex. Ask it to call
 `session_get_instructions` on the Whiteboard server. The result contains the
 instructions for writing a review.
 
-Continue with [Your first review](/start/first-review/). For questions inside
-Whiteboard, [Ask Agent](/guides/ask-agent/) uses your installed `codex` command
-and login. Whiteboard includes the adapter that connects Ask to Codex.
+Continue with [Create a review](/guides/create-a-review/). For questions inside
+Whiteboard, [Ask Agent](/guides/give-feedback/#ask-inside-whiteboard) uses your
+installed `codex` command and login. Whiteboard includes the adapter that
+connects Ask to Codex.

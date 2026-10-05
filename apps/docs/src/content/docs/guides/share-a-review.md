@@ -52,5 +52,7 @@ whiteboard share revoke <share-id>
 ```
 
 Revocation stops future downloads from that link. It does not delete copies that
-readers already downloaded. If sharing fails, see
+readers already downloaded.
+
+If an upload fails, see
 [Sharing does not finish](/help/troubleshooting/#sharing-does-not-finish).

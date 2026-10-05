@@ -12,8 +12,8 @@ v0.2.0.
 ## Before you begin
 
 Install Copilot CLI. Complete its sign-in process. Install the
-[Whiteboard command](/start/installation/#enable-the-command). Keep Whiteboard
-open during setup. Print the setup instructions with:
+[Whiteboard command](/agents/#enable-the-command). Keep Whiteboard open during
+setup. Print the setup instructions with:
 
 ```sh
 whiteboard connect copilot
@@ -57,4 +57,4 @@ find `whiteboard` after installation, open a new terminal.
 
 Reload Copilot's MCP tools or restart Copilot CLI. Ask it to call
 `session_get_instructions` on the Whiteboard server. After the call succeeds,
-follow [Your first review](/start/first-review/).
+follow [Create a review](/guides/create-a-review/).

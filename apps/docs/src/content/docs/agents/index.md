@@ -1,60 +1,51 @@
 ---
 title: Connect your agent
-description:
-  Connect a coding agent to Whiteboard, choose its setup instructions, and test
-  the connection.
+description: Choose an agent, connect it to Whiteboard, and test the connection.
 ---
 
-Whiteboard uses your installed coding agent and its model access. Install the
-agent and sign in before setup. Whiteboard does not include a model
-subscription.
+Install your coding agent and sign in before setup. Whiteboard uses your agent's
+model access. It does not include a model subscription.
 
-## Review creation and Ask Agent
+## Enable the command
 
-Your agent can create and update reviews from its own interface. It connects
-through MCP, a protocol that connects agents to tools. Some agents use a plugin
-to install that connection.
+Keep Whiteboard open. On the welcome screen, select Install whiteboard in PATH
+if available. You can also install it under Settings → Command line.
 
-Ask Agent answers questions inside Whiteboard. It uses ACP, a protocol for
-communication between an agent and an app. Ask is a preview feature in
-Whiteboard v0.2.0 and requires a supported local agent command.
+Open a new terminal and run:
 
-## Compatibility
+```sh
+whiteboard --version
+```
 
-Select your agent in the table to open its setup instructions. The table lists
-integrations included in Whiteboard v0.2.0. Support varies by agent version and
-operating system. See
-[Ask Agent requirements](/guides/ask-agent/#before-you-begin).
+If the command does not start, see
+[Command not found](/help/troubleshooting/#command-not-found).
 
-| Agent                                  | Create reviews from your agent                 | Ask inside Whiteboard          |
-| -------------------------------------- | ---------------------------------------------- | ------------------------------ |
-| [Claude Code](/agents/claude-code/)    | Plugin, or direct MCP on Windows               | Yes, preview                   |
-| [Codex](/agents/codex/)                | Plugin                                         | Yes, preview                   |
-| [Cursor](/agents/cursor/)              | MCP                                            | Yes, with Cursor CLI, preview  |
-| [OpenCode v2](/agents/opencode/)       | MCP                                            | Yes, preview                   |
-| [Pi](/agents/pi/)                      | Native MCP in Pi 0.99+, extension for older Pi | Yes, with limitations, preview |
-| [oh-my-pi](/agents/oh-my-pi/)          | MCP                                            | Not supported                  |
-| [GitHub Copilot CLI](/agents/copilot/) | Plugin, or direct MCP on Windows               | Not supported                  |
+## Connect from Whiteboard
 
-## Start from the app
-
-On Whiteboard's welcome screen:
+On the welcome screen:
 
 1. Select your agent under Connect your agents.
 2. Copy the setup prompt.
-3. Paste the prompt into your agent.
+3. Paste it into your agent and follow its instructions.
 
-The prompt contains instructions for your installed app and platform.
+Review creation uses MCP, a protocol that connects agents to tools. Some plugins
+install this connection. Older Pi uses a skill and the command line instead.
 
-You can also print the setup instructions from a terminal. For example:
+Select your agent for manual setup and restart steps:
 
-```sh
-whiteboard connect opencode
-```
+| Agent                                  | Create reviews from your agent                 | Ask inside Whiteboard     |
+| -------------------------------------- | ---------------------------------------------- | ------------------------- |
+| [Claude Code](/agents/claude-code/)    | Plugin, or direct MCP on Windows               | Preview                   |
+| [Codex](/agents/codex/)                | Plugin                                         | Preview                   |
+| [Cursor](/agents/cursor/)              | MCP                                            | Preview, with Cursor CLI  |
+| [OpenCode v2](/agents/opencode/)       | MCP                                            | Preview                   |
+| [Pi](/agents/pi/)                      | Native MCP in Pi 0.99+, extension for older Pi | Preview, with limitations |
+| [oh-my-pi](/agents/oh-my-pi/)          | MCP                                            | Not supported             |
+| [GitHub Copilot CLI](/agents/copilot/) | Plugin, or direct MCP on Windows               | Not supported             |
 
-The command prints instructions but does not apply them. Follow the instructions
-or give them to your agent. Each agent's guide also includes manual setup and
-restart steps.
+This table covers Whiteboard v0.2.0. Support varies by agent version and
+operating system. Desktop installer availability does not mean that each agent
+supports that system.
 
 ## Test the connection
 
@@ -71,9 +62,23 @@ For Pi before 0.99.0, ask the agent to run this command instead:
 whiteboard api session_get_instructions '{}'
 ```
 
-Older Pi uses the Whiteboard skill and CLI rather than MCP tools.
+A successful call returns Whiteboard's authoring instructions. Next,
+[create a review](/guides/create-a-review/).
 
-A successful call returns Whiteboard's instructions for creating reviews.
-Continue with [Your first review](/start/first-review/). If the tool is
-unavailable, follow your agent's reload or restart instructions. For connection
-errors, see [Troubleshooting](/help/troubleshooting/).
+## Ask inside Whiteboard
+
+Ask Agent answers questions about selected review text. It is a preview feature
+in v0.2.0. Ask uses ACP, a protocol for agent-to-app communication.
+
+Ask starts a separate conversation. It does not reuse the conversation that
+created the review. Install the agent's command-line interface (CLI) and sign in
+before using Ask. Cursor needs `cursor-agent`, even if you use the Cursor
+editor.
+
+Ask supports Claude Code, Codex, Cursor, OpenCode v2, and Pi. Not all
+integrations are verified on native Windows. Choose an agent that Whiteboard
+detects in your installation.
+
+Permissions differ by agent. Pi does not ask before edits or commands. Read the
+[Ask instructions and permission table](/guides/give-feedback/#ask-inside-whiteboard)
+before starting a conversation.

@@ -5,17 +5,29 @@ import { defineConfig } from "astro/config";
 import accessibleTables from "./src/plugins/accessible-tables";
 import docsLinks from "./src/plugins/docs-links";
 
+const base =
+  `/${(process.env.DOCS_BASE || "").split("/").filter(Boolean).join("/")}/`.replace(
+    /^\/\//,
+    "/",
+  );
+
 export default defineConfig({
   site: process.env.DOCS_SITE,
-  base: process.env.DOCS_BASE || "/",
+  base,
   trailingSlash: "always",
+  redirects: {
+    "/start/installation/": `${base}help/troubleshooting/#install-or-update-whiteboard`,
+    "/start/first-review/": `${base}guides/create-a-review/`,
+    "/guides/read-a-review/": `${base}guides/create-a-review/#read-the-review`,
+    "/guides/ask-agent/": `${base}guides/give-feedback/#ask-inside-whiteboard`,
+  },
   // Astro's bundled prerenderer must not pick up an older hoisted cookie package.
   vite: {
     environments: { prerender: { resolve: { noExternal: ["cookie"] } } },
   },
   markdown: {
     processor: unified({
-      remarkPlugins: [[docsLinks, { base: process.env.DOCS_BASE || "/" }]],
+      remarkPlugins: [[docsLinks, { base }]],
       rehypePlugins: [accessibleTables],
     }),
   },
@@ -27,6 +39,7 @@ export default defineConfig({
       logo: { src: "./src/assets/logo.svg", alt: "", replacesTitle: false },
       favicon: "/favicon.svg",
       customCss: ["./src/styles/custom.css"],
+      components: { Footer: "./src/components/Footer.astro" },
       editLink: {
         baseUrl:
           "https://github.com/devdotfast/whiteboard/edit/main/apps/docs/",
@@ -48,31 +61,13 @@ export default defineConfig({
         {
           label: "Start Here",
           items: [
-            { slug: "index", label: "Overview" },
-            "start/installation",
-            "start/first-review",
+            { slug: "index", label: "Introduction" },
+            "start/quick-start",
           ],
         },
         {
           label: "Use Whiteboard",
-          items: [
-            { slug: "agents", label: "Connect your agent" },
-            "guides/read-a-review",
-            "guides/give-feedback",
-            {
-              slug: "guides/ask-agent",
-              badge: { text: "Preview", variant: "note" },
-            },
-            "guides/share-a-review",
-          ],
-        },
-        {
-          label: "Help",
-          items: [
-            "help/troubleshooting",
-            { label: "Privacy and data", link: "/help/privacy/" },
-            { label: "Telemetry reference", link: "/help/telemetry/" },
-          ],
+          items: ["agents", "guides/create-a-review", "help/troubleshooting"],
         },
       ],
     }),

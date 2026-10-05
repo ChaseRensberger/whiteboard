@@ -6,8 +6,8 @@ description:
 ---
 
 Claude Code can create reviews and answer questions through Ask Agent. Before
-setup, install the [Whiteboard command](/start/installation/#enable-the-command)
-and sign in to Claude Code. Keep Whiteboard open during setup.
+setup, install the [Whiteboard command](/agents/#enable-the-command) and sign in
+to Claude Code. Keep Whiteboard open during setup.
 
 ## Connect from Whiteboard
 
@@ -57,8 +57,9 @@ Windows cannot find `whiteboard`, open a new terminal.
 
 Reload Claude's MCP tools or restart Claude Code. Ask it to call
 `session_get_instructions` on the Whiteboard server. Once the call succeeds,
-follow [Your first review](/start/first-review/).
+follow [Create a review](/guides/create-a-review/).
 
-For questions inside Whiteboard, [Ask Agent](/guides/ask-agent/) uses your
-installed `claude` command and login. Whiteboard includes the adapter that
-connects Ask to Claude Code.
+For questions inside Whiteboard,
+[Ask Agent](/guides/give-feedback/#ask-inside-whiteboard) uses your installed
+`claude` command and login. Whiteboard includes the adapter that connects Ask to
+Claude Code.

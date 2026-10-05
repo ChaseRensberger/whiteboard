@@ -1,15 +1,17 @@
 ---
-title: Give feedback
+title: Ask and give feedback
 description:
-  Send a Whiteboard selection back to your coding agent and request a clearer
-  explanation or an updated review.
+  Ask questions inside Whiteboard or send a selection to your coding agent to
+  request changes.
 ---
 
 import DemoFigure from "../../../components/DemoFigure.astro";
 import copyVideo from "../../../assets/demos/copy-for-agent.mp4?url";
 import copyPoster from "../../../assets/demos/copy-for-agent.webp";
 
-Send a review selection to your coding agent with a request for changes.
+Use Copy for Agent to continue in your existing agent conversation and request
+changes. Use Ask Agent to ask about selected text inside Whiteboard. Ask is a
+preview feature in Whiteboard v0.2.0.
 
 ## Copy a selection to your agent
 
@@ -43,12 +45,79 @@ Name the information or change you need:
 - Explain why this change needs a new table instead of an existing one.
 - Link this claim to the test that covers it.
 
+For example:
+
+```text
+Explain what happens when this request fails. Show the error path in a diagram
+and link each step to the code that handles it.
+```
+
 To change source code, give the request to your coding agent. After the code
 changes, ask the agent to update the review's comparison and explanation.
-
-## Read the updated review
 
 Open the updated section's source links to inspect the code.
 
 If you already [shared the review](/guides/share-a-review/), create a new share
 link for the updated version. Existing links retain the earlier version.
+
+## Ask inside Whiteboard
+
+Ask uses ACP, a protocol for communication between an agent and an app. It
+starts a separate session from the conversation that created the review.
+
+### Before you begin
+
+Install a supported agent's command-line interface (CLI) and sign in. See
+[Ask requirements](/agents/#ask-inside-whiteboard) for agent and platform
+support. Read the [permission table](#agent-permissions) before starting Ask.
+
+### Ask about a passage
+
+1. Open a review.
+2. Select a passage of text.
+3. Choose an available agent from the selection toolbar.
+4. Enter your question in the Ask panel.
+
+On macOS, <kbd>⌘</kbd> + <kbd>L</kbd> opens Ask for a selection when an agent is
+available. On other platforms, use the toolbar. For example:
+
+```text
+Which caller depends on this behavior, and what changes if this request fails?
+```
+
+The agent receives the selected text and review context. It can read source code
+and use the tools supplied by the integration.
+
+### Agent permissions
+
+Whiteboard v0.2.0 requests these permissions when it starts each agent.
+Restrictions differ by agent and version. Ask does not provide a shared
+read-only mode for all agents.
+
+| Agent       | Default launch behavior                                                                                  |
+| ----------- | -------------------------------------------------------------------------------------------------------- |
+| Claude Code | Disables file-edit tools. Commands can request permission. Whiteboard tools can still update the review. |
+| Codex       | Requests the `read-only` session mode.                                                                   |
+| Cursor      | Requests `ask` mode.                                                                                     |
+| OpenCode    | Supplies configuration that denies edits and asks before shell commands or web requests.                 |
+| Pi          | Has no read-only mode and does not ask before edits or commands.                                         |
+
+A permission bypass changes these restrictions for agents that support it. Read
+each tool request before approving it.
+
+### Outdated answers and preview limits
+
+Whiteboard saves the conversation with the selected passage. If that passage
+changes, Whiteboard marks the conversation Outdated. Select the updated passage
+and ask again to get an answer about its current version.
+
+In v0.2.0, Ask does not support comments on diagrams or display code diffs in
+its panel. Select text to use Ask. Open the Diff view to inspect code changes.
+
+Pi 0.99+ on non-Windows systems can receive Whiteboard's MCP tools. Older Pi and
+Windows answer without those supplied servers.
+
+For startup or sign-in problems, see
+[Ask cannot find my agent](/help/troubleshooting/#ask-cannot-find-my-agent). If
+Ask does not support your agent, use
+[Copy for Agent](#copy-a-selection-to-your-agent).

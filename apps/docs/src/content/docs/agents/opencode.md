@@ -10,8 +10,8 @@ OpenCode plugin.
 ## Before you begin
 
 Install OpenCode v2 and configure a model provider. Install the
-[Whiteboard command](/start/installation/#enable-the-command). Keep Whiteboard
-open during setup. Print the setup instructions with:
+[Whiteboard command](/agents/#enable-the-command). Keep Whiteboard open during
+setup. Print the setup instructions with:
 
 ```sh
 whiteboard connect opencode
@@ -53,7 +53,7 @@ opencode mcp list
 
 Make sure that `whiteboard` is connected. Ask your agent to call
 `session_get_instructions` on that server. After the call succeeds, follow
-[Your first review](/start/first-review/).
+[Create a review](/guides/create-a-review/).
 
 ## Existing installations
 
@@ -68,5 +68,6 @@ servers under `mcp.servers`. See the
 configuration format. For older OpenCode releases, use the version-specific
 instructions printed by Whiteboard.
 
-For questions inside Whiteboard, [Ask Agent](/guides/ask-agent/) launches your
+For questions inside Whiteboard,
+[Ask Agent](/guides/give-feedback/#ask-inside-whiteboard) launches your
 installed `opencode acp`.

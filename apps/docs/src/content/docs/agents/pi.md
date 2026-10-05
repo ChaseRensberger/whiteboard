@@ -6,8 +6,8 @@ description:
 ---
 
 Pi can create reviews and answer questions through Ask Agent. Before setup,
-install the [Whiteboard command](/start/installation/#enable-the-command). Keep
-Whiteboard open during setup. Follow the instructions for your Pi version below.
+install the [Whiteboard command](/agents/#enable-the-command). Keep Whiteboard
+open during setup. Follow the instructions for your Pi version below.
 
 ## Pi 0.99.0 and later
 
@@ -54,8 +54,8 @@ Run `/reload` inside Pi. On Pi 0.99+, ask the agent to call
 whiteboard api session_get_instructions '{}'
 ```
 
-After the call succeeds, follow [Your first review](/start/first-review/). If an
-older installation needs migration, follow the steps from
+After the call succeeds, follow [Create a review](/guides/create-a-review/). If
+an older installation needs migration, follow the steps from
 `whiteboard connect pi`.
 
 ## Pi in Ask Agent
@@ -66,4 +66,4 @@ tools in Ask. Older Pi and Windows answer without those supplied MCP servers.
 
 Pi has no read-only mode in this integration. It can edit files and run commands
 without asking for permission. Read the
-[Ask permissions table](/guides/ask-agent/#agent-permissions) for details.
+[Ask permissions table](/guides/give-feedback/#agent-permissions) for details.

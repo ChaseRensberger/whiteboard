@@ -42,7 +42,10 @@ function inspect(node, page) {
     for (const { name, value } of node.attrs) {
       if (name === "id") page.ids.add(value);
 
-      if (!canonical && (name === "href" || name === "src"))
+      if (
+        !canonical &&
+        (name === "href" || name === "src" || name === "poster")
+      )
         page.links.push(value);
     }
   }

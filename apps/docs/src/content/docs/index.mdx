@@ -1,20 +1,24 @@
 ---
-title: Whiteboard documentation
+title: Overview
 description:
   Install Whiteboard, connect a coding agent, and review code changes with
   explanations, diagrams, and source links.
 ---
 
 import { CardGrid, LinkCard } from "@astrojs/starlight/components";
+import DemoFigure from "../../components/DemoFigure.astro";
+import overview from "../../assets/demos/overview.mp4?url";
+import overviewPoster from "../../assets/demos/overview.webp";
 
-Whiteboard is a canvas for thoughtful software. The
-agent creates a review with explanations, diagrams, and links to source code.
-You can inspect the changes and ask the agent questions about them.
+Whiteboard your the canvas for producing thoughtful software. Use a connected coding agent to break down complex reviews and visualize changes.
+
+<DemoFigure
+  image={overviewPoster}
+  video={overview}
+  alt="A Whiteboard review with linked diagrams and code"
+/>
 
 ## Get started
-
-Install Whiteboard and connect your coding agent. Then open the agent in a local
-Git repository and ask it to create a review. The guides below cover each step.
 
 <CardGrid>
   <LinkCard
@@ -29,7 +33,7 @@ Git repository and ask it to create a review. The guides below cover each step.
   />
   <LinkCard
     title="Open your first review"
-    description="Ask your agent to explain a branch in your repository."
+    description="Ask your agent to review branch changes in your repository."
     href={`${import.meta.env.BASE_URL}start/first-review/`}
   />
   <LinkCard
@@ -38,32 +42,3 @@ Git repository and ask it to create a review. The guides below cover each step.
     href={`${import.meta.env.BASE_URL}guides/read-a-review/`}
   />
 </CardGrid>
-
-## Supported agents
-
-Whiteboard connects to Claude Code, Codex, Cursor, OpenCode v2, Pi, oh-my-pi,
-and GitHub Copilot CLI. Setup uses an agent plugin or MCP, a protocol that
-connects agents to tools.
-
-[Connect your agent](/agents/) lists the setup method for each agent and its
-support for Ask Agent, Whiteboard's question panel.
-
-## Review and give feedback
-
-Read the explanation and open its source links to inspect the code. To request a
-revision, [send feedback to your agent](/guides/give-feedback/). For questions
-about selected text, use [Ask Agent](/guides/ask-agent/).
-
-After you change the source code, ask the agent to update the review.
-
-## About these docs
-
-These guides describe
-[Whiteboard v0.2.0](https://github.com/devdotfast/whiteboard/releases/tag/v0.2.0),
-the stable release as of October 4, 2026. Ask Agent is a preview feature.
-Support varies by agent version and operating system.
-
-Whiteboard stores local reviews on your machine. Read
-[Privacy and data](/help/privacy/) for details about data storage, telemetry,
-and sharing. For help, see [Troubleshooting](/help/troubleshooting/) or join
-[Discord](https://discord.gg/wYvd2cpMQg).

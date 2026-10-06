@@ -54,5 +54,9 @@ whiteboard share revoke <share-id>
 Revocation stops future downloads from that link. It does not delete copies that
 readers already downloaded.
 
-If an upload fails, see
-[Sharing does not finish](/help/troubleshooting/#sharing-does-not-finish).
+## Sharing does not finish
+
+If the Share review panel requests GitHub sign-in, complete it and return to
+Whiteboard. If the panel reports an upload error, use Retry. If readers cannot
+open linked code, make sure that their accounts can access the repository and
+its pinned commits.

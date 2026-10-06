@@ -16,7 +16,7 @@ export default defineConfig({
   base,
   trailingSlash: "always",
   redirects: {
-    "/start/installation/": `${base}help/troubleshooting/#install-or-update-whiteboard`,
+    "/start/installation/": `${base}agents/#install-or-update-whiteboard`,
     "/start/first-review/": `${base}guides/create-a-review/`,
     "/guides/read-a-review/": `${base}guides/create-a-review/#read-the-review`,
     "/guides/ask-agent/": `${base}guides/give-feedback/#ask-inside-whiteboard`,

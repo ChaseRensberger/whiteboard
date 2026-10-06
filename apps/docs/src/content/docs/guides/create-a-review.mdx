@@ -89,6 +89,9 @@ sections before the agent finishes.
 Select a diagram step or a code reference to open its source. If an element has
 no source link, ask the agent to add one.
 
+If a link opens the wrong code, make sure that the review uses the intended
+repository and revisions. Ask the agent to correct the comparison and links.
+
 ### Inspect the diff
 
 Open the Diff view to compare the code versions. Structural diffs compare code
@@ -126,6 +129,10 @@ To enable summaries:
 
 Test setup sends synthetic code without saving the configuration. Read the
 original source before relying on a summary.
+
+If summaries do not appear, use Test setup to test the Gemini API key and model.
+Save the configuration and reload the window when prompted. Summaries apply to
+large new functions and tests, not every change.
 
 ## Ask questions and request changes
 

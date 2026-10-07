@@ -16,10 +16,10 @@ export default defineConfig({
   base,
   trailingSlash: "always",
   redirects: {
-    "/start/installation/": `${base}agents/#install-or-update-whiteboard`,
+    "/start/installation/": `${base}installation/`,
     "/start/first-review/": `${base}guides/create-a-review/`,
     "/guides/read-a-review/": `${base}guides/create-a-review/#read-the-review`,
-    "/guides/ask-agent/": `${base}guides/give-feedback/#ask-inside-whiteboard`,
+    "/guides/ask-agent/": `${base}guides/create-a-review/`,
   },
   // Astro's bundled prerenderer must not pick up an older hoisted cookie package.
   vite: {
@@ -67,7 +67,12 @@ export default defineConfig({
         },
         {
           label: "Use Whiteboard",
-          items: ["agents", "guides/create-a-review", "help/troubleshooting"],
+          items: [
+            "installation",
+            "agents",
+            "guides/create-a-review",
+            "help/troubleshooting",
+          ],
         },
       ],
     }),

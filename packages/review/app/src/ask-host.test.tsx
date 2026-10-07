@@ -61,10 +61,17 @@ function button(name: RegExp) {
   );
 }
 
-it("asks before closing an Ask whose agent works, and keeps it going minimized", async () => {
-  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+/** The threads a watch request follows. */
+function watchedThreads(init: RequestInit | undefined): string[] {
+  return (JSON.parse(String(init?.body)) as { threads: string[] }).threads;
+}
+
+/** A canvas with Ask: an agent named Codex that answers each question in a
+ * thread of its own, which the test drives. */
+function askCanvas() {
   const session = testReviewSession();
-  let push!: (update: AskUpdate) => void;
+  const streams = new Map<string, (update: AskUpdate) => void>();
+  let asked = 0;
 
   const fetch = vi
     .spyOn(session, "fetch")
@@ -76,15 +83,22 @@ it("asks before closing an Ask whose agent works, and keeps it going minimized",
 
       if (endpoint === "/ask/threads") return Response.json({ threads: [] });
 
-      if (endpoint === "/ask") return Response.json({ threadId: "thread" });
+      if (endpoint === "/ask")
+        return Response.json({ threadId: `thread-${++asked}` });
 
-      if (endpoint === "/ask/thread/watch")
+      // Every open Ask follows its thread over one stream; the newest
+      // carries each thread's updates.
+      if (endpoint === "/ask/watch")
         return new Response(
           new ReadableStream<Uint8Array>({
             start(controller) {
-              push = (update) =>
-                controller.enqueue(
-                  new TextEncoder().encode(JSON.stringify(update) + "\n"),
+              for (const threadId of watchedThreads(init))
+                streams.set(threadId, (update) =>
+                  controller.enqueue(
+                    new TextEncoder().encode(
+                      JSON.stringify({ threadId, update }) + "\n",
+                    ),
+                  ),
                 );
             },
           }),
@@ -93,10 +107,10 @@ it("asks before closing an Ask whose agent works, and keeps it going minimized",
       return Response.json({ ok: true }, { status: init?.method ? 200 : 404 });
     });
 
-  const closed = () =>
+  const requested = (suffix: string) =>
     fetch.mock.calls
       .map(([endpoint]) => String(endpoint))
-      .filter((endpoint) => endpoint.endsWith("/close"));
+      .filter((endpoint) => endpoint.endsWith(suffix));
 
   let store!: ReviewPanelStore;
 
@@ -110,8 +124,9 @@ it("asks before closing an Ask whose agent works, and keeps it going minimized",
   document.body.append(container);
   const root = createRoot(container);
 
-  try {
-    await act(async () =>
+  /** Mounts the canvas. */
+  const mount = () =>
+    act(async () =>
       root.render(
         <ReviewSessionProvider session={session}>
           <ReviewDebugSettingsProvider>
@@ -126,15 +141,14 @@ it("asks before closing an Ask whose agent works, and keeps it going minimized",
       ),
     );
 
-    await act(async () => store.getState().openAsk(selection));
-
+  const askQuestion = async (text: string) => {
     const textarea = document.querySelector("textarea")!;
 
     await act(async () => {
       Object.getOwnPropertyDescriptor(
         HTMLTextAreaElement.prototype,
         "value",
-      )!.set!.call(textarea, "Is this safe on replicas?");
+      )!.set!.call(textarea, text);
       textarea.dispatchEvent(new Event("input", { bubbles: true }));
     });
     await act(async () =>
@@ -142,115 +156,168 @@ it("asks before closing an Ask whose agent works, and keeps it going minimized",
         new KeyboardEvent("keydown", { key: "Enter", bubbles: true }),
       ),
     );
-    await act(async () => push({ seq: 1, snapshot: running("thread") }));
+  };
 
-    // Closing would stop the agent, so it asks first.
-    await act(async () => button(/^Close Ask$/)!.click());
-    expect(document.body.textContent).toContain("Stop Codex?");
-    expect(closed()).toEqual([]);
+  return {
+    store: () => store,
+    streams,
+    closed: () => requested("/close"),
+    /** The threads of each watch stream still open. */
+    watching: () =>
+      fetch.mock.calls
+        .filter(
+          ([endpoint, init]) =>
+            endpoint === "/ask/watch" && !init?.signal?.aborted,
+        )
+        .map(([, init]) => watchedThreads(init)),
+    mount,
+    askQuestion,
+    async [Symbol.asyncDispose]() {
+      await act(async () => root.unmount());
+      container.remove();
+      vi.restoreAllMocks();
+      vi.unstubAllGlobals();
+    },
+  };
+}
 
-    // Minimized, the agent keeps going, and the pill says so.
-    await act(async () => button(/^Minimize$/)!.click());
-    expect(button(/^Open Ask: Codex, Answering/)).not.toBeNull();
-    expect(closed()).toEqual([]);
+it("asks before closing an Ask whose agent works, and keeps it going minimized beside a new one", async () => {
+  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+  await using canvas = askCanvas();
+  const { streams, closed, askQuestion } = canvas;
 
-    // Stopping it is a choice made twice.
-    await act(async () => button(/^Open Ask: Codex, Answering/)!.click());
-    await act(async () => button(/^Close Ask$/)!.click());
-    await act(async () => button(/^Stop and close$/)!.click());
-    expect(closed()).toEqual(["/ask/thread/close"]);
-    expect(document.querySelector("textarea")).toBeNull();
-  } finally {
-    await act(async () => root.unmount());
-    container.remove();
-    vi.restoreAllMocks();
-    vi.unstubAllGlobals();
-  }
+  await canvas.mount();
+  const store = canvas.store();
+
+  await act(async () => store.getState().openAsk(selection));
+  await askQuestion("Is this safe on replicas?");
+  await act(async () =>
+    streams.get("thread-1")!({ seq: 1, snapshot: running("thread-1") }),
+  );
+
+  // Closing would stop the agent, so it asks first.
+  await act(async () => button(/^Close Ask$/)!.click());
+  expect(document.body.textContent).toContain("Stop Codex?");
+  expect(closed()).toEqual([]);
+
+  // Minimized, the agent keeps going, and the pill says so.
+  await act(async () => button(/^Minimize$/)!.click());
+  expect(button(/^Open Ask: Codex, Answering/)).not.toBeNull();
+  expect(document.querySelector("textarea")).toBeNull();
+  expect(closed()).toEqual([]);
+
+  // A new question opens beside it.
+  await act(async () => store.getState().openAsk(selection));
+  await askQuestion("Why a new index?");
+  await act(async () =>
+    streams.get("thread-2")!({ seq: 1, snapshot: running("thread-2") }),
+  );
+  expect(button(/^Open Ask: Codex, Answering/)).not.toBeNull();
+
+  // The first comes back in the window, beside the docked second.
+  await act(async () => button(/^Open Ask: Codex, Answering/)!.click());
+  expect(
+    document.querySelector('[role="dialog"][aria-label="Ask"]'),
+  ).not.toBeNull();
+  expect(document.querySelector('aside[aria-label="Ask"]')).not.toBeNull();
+
+  // Stopping it is a choice made twice.
+  const windowClose = () =>
+    document.querySelector<HTMLButtonElement>(
+      '[role="dialog"][aria-label="Ask"] button[aria-label="Close Ask"]',
+    )!;
+
+  await act(async () => windowClose().click());
+  await act(async () => button(/^Stop and close$/)!.click());
+  expect(closed()).toEqual(["/ask/thread-1/close"]);
+  expect(
+    document.querySelector('[role="dialog"][aria-label="Ask"]'),
+  ).toBeNull();
+
+  // Once its agent has answered, an Ask closes at once.
+  await act(async () =>
+    streams.get("thread-2")!({
+      seq: 2,
+      snapshot: { ...running("thread-2"), status: "idle" },
+    }),
+  );
+  await act(async () => button(/^Close Ask$/)!.click());
+  expect(closed()).toEqual(["/ask/thread-1/close", "/ask/thread-2/close"]);
+  expect(document.querySelector("textarea")).toBeNull();
 });
 
-it("closes an Ask at once once its agent has answered", async () => {
+it("follows the threads of every open Ask over one connection", async () => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
-  const session = testReviewSession();
-  let push!: (update: AskUpdate) => void;
+  await using canvas = askCanvas();
+  const { streams, askQuestion } = canvas;
 
-  const fetch = vi
-    .spyOn(session, "fetch")
-    .mockImplementation(async (endpoint, init) => {
-      if (endpoint === "/ask/agents")
-        return Response.json({
-          agents: [{ id: "codex", name: "Codex", available: true }],
-        });
+  await canvas.mount();
+  const store = canvas.store();
 
-      if (endpoint === "/ask/threads") return Response.json({ threads: [] });
+  // A browser opens only a few connections to a host: a stream for each
+  // Ask would soon leave none for the review's other requests.
+  for (const [index, question] of ["One?", "Two?", "Three?"].entries()) {
+    await act(async () => store.getState().openAsk(selection));
+    await askQuestion(question);
 
-      if (endpoint === "/ask/saved/open")
-        return Response.json({ threadId: "saved" });
+    const threadId = `thread-${index + 1}`;
 
-      if (endpoint === "/ask/saved/watch")
-        return new Response(
-          new ReadableStream<Uint8Array>({
-            start(controller) {
-              push = (update) =>
-                controller.enqueue(
-                  new TextEncoder().encode(JSON.stringify(update) + "\n"),
-                );
-            },
-          }),
-        );
-
-      return Response.json({ ok: true }, { status: init?.method ? 200 : 404 });
-    });
-
-  let store!: ReviewPanelStore;
-
-  function Probe() {
-    store = useReviewPanelStore();
-
-    return null;
+    await act(async () =>
+      streams.get(threadId)!({ seq: 1, snapshot: running(threadId) }),
+    );
+    await act(async () => button(/^Minimize Ask$/)!.click());
   }
 
-  const container = document.createElement("div");
-  document.body.append(container);
-  const root = createRoot(container);
+  expect(canvas.watching()).toEqual([["thread-1", "thread-2", "thread-3"]]);
+});
 
-  try {
-    await act(async () =>
-      root.render(
-        <ReviewSessionProvider session={session}>
-          <ReviewDebugSettingsProvider>
-            <ReviewPanelProvider>
-              <AskHistoryProvider>
-                <Probe />
-                <ReviewPanelHost />
-              </AskHistoryProvider>
-            </ReviewPanelProvider>
-          </ReviewDebugSettingsProvider>
-        </ReviewSessionProvider>,
-      ),
-    );
+it("folds two or more minimized Asks into one pill that lists them", async () => {
+  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+  await using canvas = askCanvas();
+  const { streams, askQuestion } = canvas;
 
-    await act(async () =>
-      store.getState().openAskView({
-        type: "saved",
-        threadId: "saved",
-        selection,
-        agent: "codex",
-      }),
-    );
-    await act(async () =>
-      push({ seq: 1, snapshot: { ...running("saved"), status: "idle" } }),
-    );
+  await canvas.mount();
+  const store = canvas.store();
 
-    await act(async () => button(/^Close Ask$/)!.click());
-    expect(document.body.textContent).not.toContain("Stop Codex?");
-    expect(store.getState().ask).toBeNull();
-    expect(
-      fetch.mock.calls.filter(([endpoint]) => endpoint === "/ask/saved/close"),
-    ).toHaveLength(1);
-  } finally {
-    await act(async () => root.unmount());
-    container.remove();
-    vi.restoreAllMocks();
-    vi.unstubAllGlobals();
-  }
+  const minimize = async (question: string, threadId: string) => {
+    await act(async () => store.getState().openAsk(selection));
+    await askQuestion(question);
+    await act(async () =>
+      streams.get(threadId)!({ seq: 1, snapshot: running(threadId) }),
+    );
+    await act(async () => button(/^Minimize Ask$/)!.click());
+  };
+
+  const pills = () =>
+    document.querySelectorAll('button[aria-label^="Open Ask: "]');
+
+  // One keeps a pill of its own, which says what it asked about.
+  await minimize("One?", "thread-1");
+  expect(pills()).toHaveLength(1);
+  expect(pills()[0]!.textContent).toContain(
+    "\u201cThe index is created concurrently.\u201d",
+  );
+
+  // The second folds both into one, which says how many are answering:
+  // pills of their own wouldn't tell them apart.
+  await minimize("Two?", "thread-2");
+  expect(pills()).toHaveLength(0);
+
+  const folded = button(/minimized Asks$/)!;
+
+  expect(folded.textContent).toContain("2 Asks");
+  expect(folded.textContent).toContain("2 answering");
+
+  // It lists each, with what it asked about; a row opens that Ask.
+  await act(async () => folded.click());
+  expect(pills()).toHaveLength(2);
+  expect(pills()[0]!.textContent).toContain(
+    "\u201cThe index is created concurrently.\u201d",
+  );
+
+  await act(async () => (pills()[0] as HTMLButtonElement).click());
+  expect(document.querySelector("textarea")).not.toBeNull();
+  // One minimized again: its own pill, and no list.
+  expect(button(/minimized Asks$/)).toBeNull();
+  expect(pills()).toHaveLength(1);
 });

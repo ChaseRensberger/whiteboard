@@ -1,6 +1,6 @@
 import { DatabaseSync } from "node:sqlite";
 
-import type { AskThreads } from "@review/ask/threads.js";
+import { AskThreads } from "@review/ask/threads.js";
 import { AskHistory, type AskRecord } from "@review/review-api/ask-history.js";
 import { createReviewApi } from "@review/review-api/http.js";
 import type { LocalReviewData } from "@review/review-api/local-data.js";
@@ -199,4 +199,51 @@ it("serves a saved conversation without its agent or its checkout", async () => 
   expect(await response.json()).toMatchObject({ entries });
 
   expect((await api.request(`/another-review/ask/thread`)).status).toBe(404);
+});
+
+it("follows as many threads as a review has open over one watch", async () => {
+  const { reviewId } = await store.execute(
+    command({
+      type: "create",
+      title: "Payments",
+      target: { kind: "commits", ...pins },
+    }),
+  );
+
+  const api = createReviewApi(
+    store,
+    {} as LocalReviewData,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    {
+      // No agent starts: none of the threads is running.
+      threads: new AskThreads(() => {
+        throw new Error("No agent starts here.");
+      }),
+      agents: async () => [],
+    },
+  );
+
+  // More than a URL could carry; none is running, so each ends at once.
+  const threads = Array.from({ length: 500 }, () => crypto.randomUUID());
+
+  const response = await api.request(`/${reviewId}/ask/watch`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ threads }),
+  });
+
+  expect(response.status).toBe(200);
+
+  const lines = (await response.text())
+    .trim()
+    .split("\n")
+    .map((line) => JSON.parse(line));
+
+  expect(lines).toEqual(threads.map((threadId) => ({ threadId, ended: true })));
 });

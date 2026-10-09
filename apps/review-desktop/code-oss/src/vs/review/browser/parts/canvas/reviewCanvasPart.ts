@@ -29,6 +29,7 @@ import { IStorageService, StorageScope, StorageTarget } from "../../../../platfo
 import { ITelemetryService } from "../../../../platform/telemetry/common/telemetry.js";
 import { ColorScheme } from "../../../../platform/theme/common/theme.js";
 import { IThemeService } from "../../../../platform/theme/common/themeService.js";
+import { IWorkbenchThemeService } from "../../../../workbench/services/themes/common/workbenchThemeService.js";
 import { Part } from "../../../../workbench/browser/part.js";
 import { EditorPane } from "../../../../workbench/browser/parts/editor/editorPane.js";
 import type {
@@ -102,7 +103,8 @@ import { IReviewTelemetryService } from "../../../services/reviewTelemetryServic
 
 import "../../media/review.css";
 import { ReviewSessionTelemetry } from "../../reviewSessionTelemetry.js";
-import { applyReviewThemeChoice, currentReviewThemeChoice } from "../../reviewThemeChoice.js";
+import { applyReviewThemeChoice, currentReviewThemeChoice, applyReviewThemeFamily, currentReviewThemeFamily } from "../../reviewThemeChoice.js";
+import { reviewThemes } from "../../../common/reviewThemes.js";
 import { ReviewCanvasEditorInput } from "./reviewCanvasEditorInput.js";
 
 interface ReviewCanvasAssetsModule extends ReviewCanvasModule {
@@ -174,7 +176,7 @@ export class ReviewCanvasEditorPane extends EditorPane {
 	constructor(
 		group: IEditorGroup,
 		@ITelemetryService telemetryService: ITelemetryService,
-		@IThemeService private readonly reviewThemeService: IThemeService,
+		@IWorkbenchThemeService private readonly reviewThemeService: IWorkbenchThemeService,
 		@IStorageService private readonly storageService: IStorageService,
 		@IProductService private readonly productService: IProductService,
 		@IReviewDesktopConnectionService
@@ -801,12 +803,32 @@ export class ReviewCanvasEditorPane extends EditorPane {
 				return this.currentTelemetryEnabled();
 			},
 			theme: currentReviewThemeChoice(this.configurationService, this.reviewThemeService),
+			themeFamily: currentReviewThemeFamily(this.configurationService, this.reviewThemeService),
+			themeOptions: reviewThemes,
+			resolvedTheme: this.colorScheme(),
+			setThemeFamily: async (family) => {
+				await applyReviewThemeFamily(this.configurationService, this.reviewThemeService, family, currentReviewThemeChoice(this.configurationService, this.reviewThemeService));
+				return currentReviewThemeFamily(this.configurationService, this.reviewThemeService);
+			},
+			onDidChangeThemeSelection: (listener) => {
+				const subscriptions = new DisposableStore();
+				const notify = () => listener({
+					family: currentReviewThemeFamily(this.configurationService, this.reviewThemeService),
+					mode: currentReviewThemeChoice(this.configurationService, this.reviewThemeService),
+					resolved: this.colorScheme(),
+				});
+				subscriptions.add(this.reviewThemeService.onDidColorThemeChange(notify));
+				subscriptions.add(this.configurationService.onDidChangeConfiguration(event => {
+					if (['window.autoDetectColorScheme', 'workbench.colorTheme', 'workbench.preferredDarkColorTheme', 'workbench.preferredLightColorTheme'].some(key => event.affectsConfiguration(key))) notify();
+				}));
+				return subscriptions;
+			},
 			setTheme: async (choice) => {
 				this.reviewTelemetryService.capture("setting_changed", {
 					setting: "theme",
 					value: choice,
 				});
-				await applyReviewThemeChoice(this.configurationService, choice);
+				await applyReviewThemeChoice(this.configurationService, this.reviewThemeService, choice);
 				return currentReviewThemeChoice(this.configurationService, this.reviewThemeService);
 			},
 			keymap: this.currentKeymap(),

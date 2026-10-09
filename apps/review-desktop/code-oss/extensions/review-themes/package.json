@@ -24,6 +24,18 @@
 				"label": "Whiteboard Light",
 				"uiTheme": "vs",
 				"path": "./themes/review-light.json"
+			},
+			{
+				"id": "Whiteboard Gruvbox Dark",
+				"label": "Whiteboard Gruvbox Dark",
+				"uiTheme": "vs-dark",
+				"path": "./themes/gruvbox-dark.json"
+			},
+			{
+				"id": "Whiteboard Gruvbox Light",
+				"label": "Whiteboard Gruvbox Light",
+				"uiTheme": "vs",
+				"path": "./themes/gruvbox-light.json"
 			}
 		]
 	}

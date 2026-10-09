@@ -8,7 +8,7 @@ import { Action2, MenuId, MenuRegistry, registerAction2 } from '../../platform/a
 import { IConfigurationService } from '../../platform/configuration/common/configuration.js';
 import type { ServicesAccessor } from '../../platform/instantiation/common/instantiation.js';
 import { IQuickInputService, type IQuickPickItem } from '../../platform/quickinput/common/quickInput.js';
-import { IThemeService } from '../../platform/theme/common/themeService.js';
+import { IWorkbenchThemeService } from '../../workbench/services/themes/common/workbenchThemeService.js';
 import { type ReviewThemeChoice, applyReviewThemeChoice, currentReviewThemeChoice } from './reviewThemeChoice.js';
 
 interface IReviewThemeQuickPickItem extends IQuickPickItem {
@@ -27,7 +27,7 @@ class SelectReviewThemeAction extends Action2 {
 	override async run(accessor: ServicesAccessor): Promise<void> {
 		const configurationService = accessor.get(IConfigurationService);
 		const quickInputService = accessor.get(IQuickInputService);
-		const themeService = accessor.get(IThemeService);
+		const themeService = accessor.get(IWorkbenchThemeService);
 		const currentChoice = currentReviewThemeChoice(configurationService, themeService);
 		const items: IReviewThemeQuickPickItem[] = [
 			{ choice: 'light', label: localize('review.theme.light', "Light"), picked: currentChoice === 'light' },
@@ -43,7 +43,7 @@ class SelectReviewThemeAction extends Action2 {
 			return;
 		}
 
-		await applyReviewThemeChoice(configurationService, picked.choice);
+		await applyReviewThemeChoice(configurationService, themeService, picked.choice);
 	}
 }
 

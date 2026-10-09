@@ -408,6 +408,20 @@ export const REVIEW_THEME_CHOICES = ["dark", "light", "system"] as const;
 
 export type ReviewThemeChoice = (typeof REVIEW_THEME_CHOICES)[number];
 
+export type ReviewThemeFamily = "whiteboard" | "gruvbox";
+
+export interface ReviewThemeOption {
+  id: ReviewThemeFamily;
+  label: string;
+  variants: Partial<Record<ReviewTheme, { preview: readonly string[] }>>;
+}
+
+export interface ReviewThemeSelection {
+  family: ReviewThemeFamily;
+  mode: ReviewThemeChoice;
+  resolved: ReviewTheme;
+}
+
 export const REVIEW_KEYMAP_CHOICES = [
   "none",
   "vim",
@@ -551,6 +565,13 @@ export interface ReviewCanvasSettingsContent {
   setTelemetryEnabled(enabled: boolean): Promise<boolean>;
   theme: ReviewThemeChoice;
   setTheme(choice: ReviewThemeChoice): Promise<ReviewThemeChoice>;
+  themeFamily: ReviewThemeFamily;
+  themeOptions: readonly ReviewThemeOption[];
+  resolvedTheme: ReviewTheme;
+  setThemeFamily(family: ReviewThemeFamily): Promise<ReviewThemeFamily>;
+  onDidChangeThemeSelection(
+    listener: (selection: ReviewThemeSelection) => void,
+  ): ReviewDisposable;
   keymap: ReviewKeymapChoice;
   // A keymap only takes effect after the extension host restarts, so the
   // workbench offers the window reload. The page never forces one.
